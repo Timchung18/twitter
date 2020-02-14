@@ -10,7 +10,7 @@ import UIKit
 import BDBOAuth1Manager
 
 class TwitterAPICaller: BDBOAuth1SessionManager {    
-    static let client = TwitterAPICaller(baseURL: URL(string: "https://api.twitter.com"), consumerKey: "uFTmFW66AAMEUwx3rZlZDMSCf", consumerSecret: "LtlxIoQpBvHcqjpSMIA9Gs2E9wCJbr7xkx9EpSdBYoNedaZUgh")
+    static let client = TwitterAPICaller(baseURL: URL(string: TweetBaseUrl.BaseUrl.rawValue), consumerKey: "uFTmFW66AAMEUwx3rZlZDMSCf", consumerSecret: "LtlxIoQpBvHcqjpSMIA9Gs2E9wCJbr7xkx9EpSdBYoNedaZUgh")
     var loginSuccess: (() -> ())?
     var loginFailure: ((Error) -> ())?
     
@@ -28,7 +28,7 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
         loginFailure = failure
         TwitterAPICaller.client?.deauthorize()
         TwitterAPICaller.client?.fetchRequestToken(withPath: url, method: "GET", callbackURL: URL(string: "alamoTwitter://oauth"), scope: nil, success: { (requestToken: BDBOAuth1Credential!) -> Void in
-            let url = URL(string: "https://api.twitter.com/oauth/authorize?oauth_token=\(requestToken.token!)")!
+            let url = URL(string: TweetBaseUrl.Authorize.rawValue + "\(requestToken.token!)")!
             UIApplication.shared.open(url)
         }, failure: { (error: Error!) -> Void in
             print("Error: \(error.localizedDescription)")
@@ -65,7 +65,7 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     }
     
     func postTweet(tweetString: String, success: @escaping () -> (), failure: @escaping (Error) -> ()){
-        let url = "https://api.twitter.com/1.1/statuses/update.json"
+        let url = TweetBaseUrl.PostUpdate.rawValue
         TwitterAPICaller.client?.post(url, parameters: ["status": tweetString], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
             success()
         }, failure: { (task: URLSessionDataTask?, error: Error) in
@@ -74,8 +74,7 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     }
     
     func favoriteTweet(tweetId: Int, success: @escaping () -> (), failure: @escaping (Error) -> ()){
-        let url = "https://api.twitter.com/1.1/favorites/create.json"
-        TwitterAPICaller.client?.post(url, parameters: ["id": tweetId], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
+        TwitterAPICaller.client?.post(TweetBaseUrl.FavTweet.rawValue, parameters: ["id": tweetId], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
             success()
         }, failure: { (task: URLSessionDataTask?, error: Error) in
             failure(error)
@@ -83,8 +82,7 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     }
     
     func unfavoriteTweet(tweetId: Int, success: @escaping () -> (), failure: @escaping (Error) -> ()){
-        let url = "https://api.twitter.com/1.1/favorites/destroy.json"
-        TwitterAPICaller.client?.post(url, parameters: ["id": tweetId], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
+        TwitterAPICaller.client?.post(TweetBaseUrl.UnfavTweet.rawValue, parameters: ["id": tweetId], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
             success()
         }, failure: { (task: URLSessionDataTask?, error: Error) in
             failure(error)
@@ -92,7 +90,7 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     }
     
     func retweet(tweetId: Int, success: @escaping () -> (), failure: @escaping (Error) -> ()){
-        let url = "https://api.twitter.com/1.1/statuses/retweet/\(tweetId).json"
+        let url =  TweetBaseUrl.RetweetPart1.rawValue + "\(tweetId).json"
         TwitterAPICaller.client?.post(url, parameters: ["id": tweetId], progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
             success()
         }, failure: { (task: URLSessionDataTask?, error: Error) in
